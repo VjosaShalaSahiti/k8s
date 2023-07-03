@@ -1,0 +1,45 @@
+version: '3'
+services:
+  redact:
+    build:
+      context: ./redact
+      dockerfile: Dockerfile
+    ports:
+      - 2222:2222
+
+  pdf:
+    build:
+      context: ./pdf
+      dockerfile: Dockerfile
+    ports:
+      - 3355:3355
+    depends_on:
+      - redact
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+
+    ports:
+      - 4444:4444
+    depends_on:
+      - pdf
+      - redact
+
+  registration:
+    build:
+      context: ./registration
+      dockerfile: Dockerfile
+    ports:
+      - 8761:8761
+    depends_on:
+      - web
+      - pdf
+      - redact
+    links:
+      - web
+      - pdf
+      - redact
+    environment:
+      - "eureka.client.serviceUrl.defaultZone=http://eureka:8761/eureka/"
